@@ -8,7 +8,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import csv
 
-#string constants
+#string variables
 filename = "sample_results_raw.csv"
 
 title_cn = "第八届黄河杯中文有奖阅读竞赛"
@@ -18,10 +18,12 @@ committee_cn="北美黄河杯中文竞赛委员会"
 committee_en=["NORTH AMERICAN YELLOW RIVER CUP","CHINESE CONTEST COMMITTEE"]
 date_of_completion="09/30/2019"
 
+
+#string constants
 level_1_cn="初级"
 level_2_cn="中级"
 
-places=["一等奖 FIRST PLACE","二等奖 SECOND PLACE","三等奖 THIRD PLACE","完成 COMPLETION"]
+places=["一等奖 FIRST PLACE","二等奖 SECOND PLACE","三等奖 THIRD PLACE","完成 COMPLETION", "鼓励奖"]
 
 #calculations
 half_x = 5.5*inch
@@ -30,6 +32,8 @@ total_score_level_2 = 1360
 total_num_essays_level_1 = '99'
 total_num_essays_level_2 = '90'
 
+##############################################################################
+
 def generate_certificate(entry):
 	level = entry[0]
 	name = entry[1]
@@ -37,30 +41,32 @@ def generate_certificate(entry):
 	score = int(entry[4])
 	finished = entry[6]
 
-	#only process students who completed all essays
+	#only process students who completed all essays or passed by 70%
+	place = ''
 	if level == '1' and finished.split(" ")[0] != total_num_essays_level_1:
-		return
+		if .7 <= score / total_score_level_1:
+			place=places[4]
+		else:
+			return
 	elif level == '2' and finished.split(" ")[0] != total_num_essays_level_2:
-		return
+		if .7 <= score / total_score_level_2:
+			place=places[4]
+		else:
+			return
 
-	c = canvas.Canvas("results/" + name + ".pdf", pagesize=landscape(letter))
+	c = canvas.Canvas("results/" +name_cn+"_"+ name + ".pdf", pagesize=landscape(letter))
 	draw_static_elements(c)
-	
-	#title	
+
+	# certificate type
 	c.setStrokeColor(black)
 	c.setFillColor(Color(0,0,0, alpha=1.0))
 	c.setFont('Helvetica', 24)
-	c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ACHIEVEMENT")
-	c.setStrokeColorRGB(0.9,0.0,0.0)
-	c.setFillColorRGB(0.9,0.0,0.0)
-	c.setFont('Kaiti', 36)
-	c.drawCentredString(half_x,6.95*inch, title_cn)
-	c.setFont('Helvetica', 24)
-	c.drawCentredString(half_x,6.5*inch, title_en)
+	if place != places[4]:
+		c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ACHIEVEMENT")
+	else:
+		c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ENCOURAGEMENT")
 
 	#name
-	c.setStrokeColor(black)
-	c.setFillColor(black)
 	c.setFont('STHeiti', 30)
 	c.drawCentredString(half_x,4.75*inch,name_cn +"   " + name)
 
@@ -73,7 +79,9 @@ def generate_certificate(entry):
 		total_score = total_score_level_2
 		level=level_2_cn
 
-	if score / total_score >= 0.9:
+	if place == places[4]:
+		pass
+	elif score / total_score >= 0.9:
 		place = places[0]
 	elif 0.8 <= score / total_score < 0.9:
 		place = places[1]
@@ -100,7 +108,17 @@ def draw_static_elements(c):
 	c.setFillColor(Color(100,100,100, alpha=0.25))
 	c.setLineWidth(1)
 	c.rect(0.125*inch,0.125*inch,10.75*inch,8.25*inch,fill=1)
-	
+
+	#title	
+	c.setStrokeColor(black)
+	c.setFillColor(Color(0,0,0, alpha=1.0))
+	c.setStrokeColorRGB(0.9,0.0,0.0)
+	c.setFillColorRGB(0.9,0.0,0.0)
+	c.setFont('Kaiti', 36)
+	c.drawCentredString(half_x,6.95*inch, title_cn)
+	c.setFont('Helvetica', 24)
+	c.drawCentredString(half_x,6.5*inch, title_en)
+
 	#line
 	c.setLineWidth(.3)
 	c.setStrokeColor(black)
