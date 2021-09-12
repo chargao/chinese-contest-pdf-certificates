@@ -9,86 +9,104 @@ from reportlab.pdfbase.ttfonts import TTFont
 import csv
 
 #string variables
-filename = "sample_results_raw.csv"
+filename = "example_input.csv"
+bg_img_path = 'images/library_bg3.png'
+logo_img_path = 'images/logo_transparent.png'
+stamp_img_path = "images/stamp_transparent.png"
 
-title_cn = "第八届黄河杯中文有奖阅读竞赛"
-title_en = "THE 8TH YELLOW RIVER CUP CHINESE READING CONTEST"
+title_cn = "第十届黄河杯中文有奖阅读竞赛"
+title_en = "THE 10TH YELLOW RIVER CUP CHINESE READING CONTEST"
 
 committee_cn="北美黄河杯中文竞赛委员会"
 committee_en=["NORTH AMERICAN YELLOW RIVER CUP","CHINESE CONTEST COMMITTEE"]
-date_of_completion="09/30/2019"
-
+date_of_completion="09/15/2021"
 
 #string constants
 level_1_cn="初级"
 level_2_cn="中级"
+level_3_cn="高级"
+level_1_en="BEGINNER"
+level_2_en="INTERMEDIATE"
+level_3_en="ADVANCED"
 
-places=["一等奖 FIRST PLACE","二等奖 SECOND PLACE","三等奖 THIRD PLACE","完成 COMPLETION", "鼓励奖"]
+places=["完成 COMPLETION","一等奖 FIRST PLACE","二等奖 SECOND PLACE","三等奖 THIRD PLACE", "鼓励奖 ENCOURAGEMENT AWARD","荣誉奖 HONORARY AWARD"]
 
 #calculations
 half_x = 5.5*inch
-total_score_level_1 = 1643
-total_score_level_2 = 1360
-total_num_essays_level_1 = '99'
-total_num_essays_level_2 = '90'
+# total_score_level_1 = 1643
+# total_score_level_2 = 1360
+# total_num_essays_level_1 = '123'
+# total_num_essays_level_2 = '88'
 
 ##############################################################################
 
 def generate_certificate(entry):
 	level = entry[0]
-	name = entry[1]
-	name_cn = entry[2]
-	score = int(entry[4])
-	finished = entry[6]
+	name = entry[1].strip()
+	name_cn = entry[2].strip()
+	# score = int(entry[4])
+	# finished = entry[6]
+	award_level = entry[7]
 
 	#only process students who completed all essays or passed by 70%
-	place = ''
-	if level == '1' and finished.split(" ")[0] != total_num_essays_level_1:
-		if .7 <= score / total_score_level_1:
-			place=places[4]
-		else:
-			return
-	elif level == '2' and finished.split(" ")[0] != total_num_essays_level_2:
-		if .7 <= score / total_score_level_2:
-			place=places[4]
-		else:
-			return
+	# commented out because of award_level column
+	# place = ''
+	# if level == '1' and finished.split(" ")[0] != total_num_essays_level_1:
+	# 	if .7 <= score / total_score_level_1:
+	# 		place=places[4]
+	# 	else:
+	# 		return
+	# elif level == '2' and finished.split(" ")[0] != total_num_essays_level_2:
+	# 	if .7 <= score / total_score_level_2:
+	# 		place=places[4]
+	# 	else:
+	# 		return
+	place = places[0]
+	if award_level == '0':
+		return # no award
+	elif award_level == '1':
+		place = places[1] # 一等奖 FIRST PLACE
+	elif award_level == '2':
+		place = places[2] # 二等奖 SECOND PLACE
+	elif award_level == '3':
+		place = places[3] # 三等奖 THIRD PLACE
+	elif award_level == '4':
+		place = places[4] # 鼓励奖 ENCOURAGEMENT AWARD
+	elif award_level == '5':
+		place = places[5] # 荣誉奖 HONORARY AWARD
 
-	c = canvas.Canvas("results/" +name_cn+"_"+ name + ".pdf", pagesize=landscape(letter))
+	lvl_en=''
+	if level == '1':
+		#total_score = total_score_level_1
+		level=level_1_cn
+		lvl_en=level_1_en
+	elif level == '2':
+		#total_score = total_score_level_2
+		level=level_2_cn
+		lvl_en=level_2_en
+	elif level == '3':
+		#total_score = total_score_level_3
+		level=level_3_cn
+		lvl_en=level_3_en
+
+	# create canvas
+	c = canvas.Canvas("results/" +str(i)+"_"+lvl_en+"_"+ name + ".pdf", pagesize=landscape(letter))
 	draw_static_elements(c)
 
 	# certificate type
 	c.setStrokeColor(black)
 	c.setFillColor(Color(0,0,0, alpha=1.0))
 	c.setFont('Helvetica', 24)
-	if place != places[4]:
-		c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ACHIEVEMENT")
-	else:
-		c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ENCOURAGEMENT")
+	# if place != places[4]:
+	# 	c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ACHIEVEMENT")
+	# else:
+	# 	c.drawCentredString(half_x,7.5*inch, "CERTIFICATE OF ENCOURAGEMENT")
 
-	#name
+	#awardee name
 	c.setFont('STHeiti', 30)
 	c.drawCentredString(half_x,4.75*inch,name_cn +"   " + name)
 
-	#scoring logic
 	c.setFont('STHeiti', 28)
-	if level == '1':
-		total_score = total_score_level_1
-		level=level_1_cn
-	elif level == '2':
-		total_score = total_score_level_2
-		level=level_2_cn
-
-	if place == places[4]:
-		pass
-	elif score / total_score >= 0.9:
-		place = places[0]
-	elif 0.8 <= score / total_score < 0.9:
-		place = places[1]
-	elif 0.7 <= score / total_score < 0.8:
-		place = places[2]
-	else:
-		place = places[3]
 	c.drawCentredString(half_x,4.25*inch,level+place)
 	 
 	#output
@@ -96,8 +114,7 @@ def generate_certificate(entry):
 
 def draw_static_elements(c):
 	#background
-	img_path = 'images/background.jpg'
-	c.drawImage(image=img_path,x=0.25*inch,y=0.25*inch,width=10.5*inch,height=8.0*inch, mask='auto')
+	c.drawImage(image=bg_img_path,x=0.25*inch,y=0.25*inch,width=10.5*inch,height=8.0*inch, mask='auto')
 	
 	#gold border
 	c.setStrokeColorRGB(0.999,0.799,0.066)
@@ -135,8 +152,7 @@ def draw_static_elements(c):
 	c.drawCentredString(half_x,1.33*inch,date_of_completion)
 
 	#logo
-	img_path = 'images/logo_transparent.png'
-	c.drawImage(image=img_path,x=9*inch,y=1*inch,width=inch,height=inch, mask='auto')
+	c.drawImage(image=logo_img_path,x=9*inch,y=1*inch,width=inch,height=inch, mask='auto')
 
 	#stamp
 	c.setStrokeColorRGB(0.8,0.0,0.0)
@@ -144,8 +160,7 @@ def draw_static_elements(c):
 	c.setFont('Helvetica', 14)
 	c.drawCentredString(1.5*inch,2.3*inch,"DIRECTOR")
 	c.drawCentredString(1.5*inch,2.05*inch,"JIMMY GAO")
-	img_path = 'images/stamp_transparent.png'
-	c.drawImage(image=img_path,x=1*inch,y=1*inch,width=inch,height=inch, mask='auto')
+	c.drawImage(image=stamp_img_path,x=1*inch,y=1*inch,width=inch,height=inch, mask='auto')
  
 #main
 if __name__ == '__main__':
@@ -159,4 +174,5 @@ if __name__ == '__main__':
 		csvreader.__next__() 
 
 		for row in csvreader: 
+			print(row[1].strip())
 			generate_certificate(row)
