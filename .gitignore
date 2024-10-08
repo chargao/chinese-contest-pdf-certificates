@@ -2,4 +2,5 @@
 *.ttf
 *.ttc
 images/*.jpg
-*venv
+venv
+results

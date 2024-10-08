@@ -13,8 +13,7 @@ import csv
 styles = getSampleStyleSheet()
 
 #string variables
-# filename = "sample_results_raw.csv"
-filename = "2024.csv"
+filename = "example_input.csv"
 logo_img_path = 'images/logo_transparent.png'
 stamp_img_path = "images/stamp_transparent.png"
 
